@@ -1,6 +1,1 @@
-# byte
-Soon.
-
-
-Ok maybe not THAT soon.
-Q3 2019 at the latest.
+#This is Byte, a Scratch-inspired Pygame IDE
