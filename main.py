@@ -14,11 +14,17 @@ def byteSetup():
 
     if os.path.isfile("cfg.cfg"):
 
+        global blockNames
+        blockNames = ["Motion", "Looks", "Display", "Tiles", "Sound", "Events", "Control", "Sensing", "Operators", "Variables", "Lists", "System", "Files", "Functions", "Libraries", "Numbers", "Strings", "Iterables", "Error", "error2"]
+
         global byteFont
         byteFont = pygame.font.Font("byteAssets/rubik.ttf", 12)
 
         global byteCfg
         byteCfg = []
+
+        global scroll
+        scroll = 0
 
         with open("cfg.cfg") as f:
             byteCfgFile = f.read().splitlines()
@@ -131,16 +137,20 @@ def byteSetup():
 
 byteSetup()
 
-def byteBttn(action, textinput, x = 0, y = 0, bgcolor = [0, 0, 0], textcolor = [255, 255, 255]):
+def byteBttn(action, textinput, x = 0, y = 0, bgcolor = [0, 0, 0], key = 1, textcolor = [255, 255, 255]):
     textsize = pygame.font.Font.size(byteFont, textinput)  # lint:ok
     pygame.draw.rect(screen, bgcolor, pygame.Rect((x, y), (textsize[0] + 10, textsize[1])))
     textrend(textinput, x + 5, y)
     global byteButtons
-    byteButtons.append([action, x, y, x + textsize[0] + 10, y + textsize[1]])
+    byteButtons.append([action, x, y, x + textsize[0] + 10, y + textsize[1], key])
 
-def byteBttnChk(x, y):
+def byteRegion(action, x = 0, y = 0, w = 10, h = 10, key = 1):
+    global byteButtons
+    byteButtons.append([action, x, y, x + w, y + h, key])
+
+def byteBttnChk(x, y, key):
     for button in byteButtons:
-        if (button[1] <= x <= button[3]) and (button[2] <= y <= button[4]):
+        if (button[1] <= x <= button[3]) and (button[2] <= y <= button[4]) and (key == button[5]):
             exec(button[0])
 
 def byteDialogue():
@@ -158,11 +168,25 @@ def displayTest():
     screen.fill(byteCfg[testindex])  # lint:ok
 
 def drawLayers():
+    screen.fill(0xbbbbbb)
     drawLayer0()
+    drawLayer1()
 
 def drawLayer0():
+    if byteMenu == 0:  # lint:ok
+        pygame.draw.rect(screen, 0x646464, pygame.Rect((193, scroll + 18), (5, 16)))  # lint:ok
+        byteRegion("global scroll; scroll = scroll + 16", 0, 16, 200, size[1], 5)
+        byteRegion("global scroll; scroll = scroll - 16", 0, 16, 200, size[1], 4)
+        for i in list(range(18)):
+            if (size[1] + (i * 16)) <= scroll:  # lint:ok
+                pygame.draw.rect(screen, byteCfg[i + 2], pygame.Rect((0, 16 * (i + 1)), (191, 16)))  # lint:ok
+            else:
+                pygame.draw.rect(screen, byteCfg[i + 2], pygame.Rect((0, size[1] - (scroll - (16 * (i + 1)))), (191, 16)))  # lint:ok
+                byteBttn("pass", blockNames[i], 0, size[1] - (scroll - (16 * (i + 1))), byteCfg[i + 2])  # lint:ok
+
+
+def drawLayer1():
     global size
-    screen.fill(0xbbbbbb)
     pygame.draw.rect(screen, 0x999999, pygame.Rect((0, 0), (size[0], 16)))  # lint:ok
     if byteMenu == 0:  # lint:ok
         pygame.draw.rect(screen, 0x999999, pygame.Rect((200, 16), (3, size[1] - 16)))  # lint:ok block shelf divider
@@ -214,7 +238,6 @@ while True:
             #print(size)
 
         if event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1:
-                byteBttnChk(event.pos[0], event.pos[1])
+            byteBttnChk(event.pos[0], event.pos[1], event.button)
 
     pygame.display.flip()
