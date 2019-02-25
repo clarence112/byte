@@ -14,6 +14,9 @@ def byteSetup():
 
     if os.path.isfile("cfg.cfg"):
 
+        global widths
+        widths = [100, 200, 34, 47, 386, 22, 54, 54, 54, 54, 54, 54, 54, 54, 54, 54, 54, 54, 54, 54]
+
         global blockNames
         blockNames = ["Motion", "Looks", "Display", "Tiles", "Sound", "Events", "Control", "Sensing", "Operators", "Variables", "Lists", "System", "Files", "Functions", "Libraries", "Numbers", "Strings", "Iterables", "Error", "error2"]
 
@@ -167,25 +170,47 @@ def displayTest():
         testindex = 0
     screen.fill(byteCfg[testindex])  # lint:ok
 
+def blockShelfWidthTest(ihold):
+    ihold2 = 0
+    while not ihold == 0:
+        ihold2 = ihold2 + widths[ihold]  # lint:ok
+        ihold = ihold - 1
+    return(ihold2)
+
 def drawLayers():
     screen.fill(0xbbbbbb)
+    drawBlockShelf()
     drawLayer0()
-    drawLayer1()
 
-def drawLayer0():
+def drawBlockShelf():
     if byteMenu == 0:  # lint:ok
         pygame.draw.rect(screen, 0x646464, pygame.Rect((193, scroll + 18), (5, 16)))  # lint:ok
         byteRegion("global scroll; scroll = scroll + 16", 0, 16, 200, size[1], 5)
         byteRegion("global scroll; scroll = scroll - 16", 0, 16, 200, size[1], 4)
         for i in list(range(18)):
-            if (size[1] + (i * 16)) <= scroll:  # lint:ok
-                pygame.draw.rect(screen, byteCfg[i + 2], pygame.Rect((0, 16 * (i + 1)), (191, 16)))  # lint:ok
+            if i == 0:
+                pygame.draw.rect(screen, byteCfg[i + 2], pygame.Rect((0, 16), (191, 16)))   # lint:ok
+                byteBttn("pass", blockNames[i], 0, 16, byteCfg[i + 2])  # lint:ok
             else:
-                pygame.draw.rect(screen, byteCfg[i + 2], pygame.Rect((0, size[1] - (scroll - (16 * (i + 1)))), (191, 16)))  # lint:ok
-                byteBttn("pass", blockNames[i], 0, size[1] - (scroll - (16 * (i + 1))), byteCfg[i + 2])  # lint:ok
+                curwidth = blockShelfWidthTest(i)
+                if (curwidth - 16) < scroll:  # lint:ok
+
+                    pygame.draw.rect(screen, byteCfg[i + 2], pygame.Rect((0, (16 * (i + 1))), (191, 16)))  # lint:ok
+                    byteBttn("pass", blockNames[i], 0, 16 * (1 + i), byteCfg[i + 2])  # lint:ok
+
+                elif ((curwidth - scroll) + (16 * (i + 1))) < (size[1] - (16 *(17 - i))):  # lint:ok
+
+                    pygame.draw.rect(screen, byteCfg[i + 2], pygame.Rect((0, (curwidth + (16 * (i))) - scroll), (191, 16)))  # lint:ok
+                    byteBttn("pass", blockNames[i], 0, (curwidth + (16 * (i)) - scroll), byteCfg[i + 2])  # lint:ok
+
+                else:
+
+                    pygame.draw.rect(screen, byteCfg[i + 2], pygame.Rect((0, size[1] - (16 * (18 - i))), (191, 16)))  # lint:ok
+                    byteBttn("pass", blockNames[i], 0, size[1] - (16 * (18 - i)), byteCfg[i + 2])  # lint:ok
 
 
-def drawLayer1():
+
+def drawLayer0():
     global size
     pygame.draw.rect(screen, 0x999999, pygame.Rect((0, 0), (size[0], 16)))  # lint:ok
     if byteMenu == 0:  # lint:ok
@@ -211,11 +236,16 @@ while True:
         clock.tick(2) # lint:ok
     elif byteCfg[24] == 2: # lint:ok
         textrend("text test")
-    else:
+    elif byteCfg[24] == 3:  # lint:ok
+        byteBttn("pass", str(scroll), 200, 60, byteCfg[3])  # lint:ok
+        drawLayers()
+    elif byteCfg[24] == 4:  # lint:ok
         drawLayers()
         if testvar == 0:
             print(byteButtons)
             testvar = 1
+    else:
+        drawLayers()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
